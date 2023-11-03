@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EITracker.UI", "EITracker.UI.csproj", "{FB9CFBFE-2B6C-4CBE-8D66-45F7FB46A056}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EITracker.Models", "..\EITracker.Models\EITracker.Models.csproj", "{D6D06C2B-48CC-45F0-B928-01F9CE14E41F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FB9CFBFE-2B6C-4CBE-8D66-45F7FB46A056}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB9CFBFE-2B6C-4CBE-8D66-45F7FB46A056}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB9CFBFE-2B6C-4CBE-8D66-45F7FB46A056}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB9CFBFE-2B6C-4CBE-8D66-45F7FB46A056}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6D06C2B-48CC-45F0-B928-01F9CE14E41F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6D06C2B-48CC-45F0-B928-01F9CE14E41F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6D06C2B-48CC-45F0-B928-01F9CE14E41F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6D06C2B-48CC-45F0-B928-01F9CE14E41F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F176A192-1CD4-4A5B-92AC-F481CCE5CEFA}
+	EndGlobalSection
+EndGlobal

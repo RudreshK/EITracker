@@ -7,7 +7,6 @@
 
 <div>
     <h1>EI Employees</h1>
-
 </div>
 
 
@@ -88,7 +87,6 @@ else
 }
 
 
-
 @code {
 
     private readonly CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(300));
@@ -129,9 +127,15 @@ else
         ShowBackdrop = false;
         StateHasChanged();
     }
-    public void Done(UserModel user)
+    public async Task Done(UserModel user)
     {
         userService.PatchUserAsync(user,tokenSource.Token);
+        userModels = new List<UserModel>();
+        userModels = await userService.GetAllUsersAsync();
         Close();
+    }
+    private async Task RefreshTable()
+    {
+        await JSRuntime.InvokeVoidAsync("refreshTable");
     }
 }

@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "dotnet",
+			"task": "watch EITracker.UI",
+			"file": "D:\\EI Tracker\\EITracker.UI\\EITracker.UI.csproj",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"label": "dotnet: watch EITracker.UI",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}

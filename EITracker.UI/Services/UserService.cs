@@ -36,15 +36,6 @@ namespace EITracker.UI.Services
                 // Send the request and await the response
                 var response = await _httpClient.SendAsync(request);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    GetAllUsersAsync();
-                }
-                else
-                {
-                    // Handle error here
-                }
-           
         }
     }
 }
