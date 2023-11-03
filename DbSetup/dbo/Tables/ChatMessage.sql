@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[ChatMessage]
+(
+	[ChatId] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
+    [FromUserId] UNIQUEIDENTIFIER NOT NULL, 
+    [ToUserId] UNIQUEIDENTIFIER NOT NULL, 
+    [Message] NCHAR(10) NULL, 
+    [CreatedDate] DATETIME2 NOT NULL
+)
