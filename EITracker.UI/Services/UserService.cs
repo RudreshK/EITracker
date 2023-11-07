@@ -1,7 +1,6 @@
 ﻿using EITracker.Models;
-using Microsoft.AspNetCore.OData.Deltas;
 using Newtonsoft.Json;
-using NuGet.Protocol;
+using System.Net.Http.Json;
 using System.Text;
 
 namespace EITracker.UI.Services
@@ -17,8 +16,14 @@ namespace EITracker.UI.Services
         {
             List<UserModel> users = new List<UserModel>();
             var apiusers = await this._httpClient.GetFromJsonAsync<List<UserModel>>("api/Users");
-
             return apiusers;
+        }
+
+        public async Task<List<string>> GetAllRolesAsync()
+        {
+            List<string> roles = new List<string>();
+             roles =  await this._httpClient.GetFromJsonAsync<List<string>>($"api/Users({ Guid.Empty})/roles");
+            return roles;
         }
         public async Task<UserModel> GetUserByIdAsync(Guid userId)
         {
@@ -34,8 +39,18 @@ namespace EITracker.UI.Services
                 request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
 
                 // Send the request and await the response
-                var response = await _httpClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request,token);
 
+        }
+        public async Task PostUserAsync(UserModel user, CancellationToken token)
+        {          
+            var apiUrl = "api/Users";
+
+            // Create the request message
+            var request = new HttpRequestMessage(new HttpMethod("POST"), apiUrl);
+            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request,token);
         }
     }
 }

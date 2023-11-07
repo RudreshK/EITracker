@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ODataDemo.Services;
+using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -50,13 +51,38 @@ namespace ODataDemo.Controllers
                 LastName = x.LastName,
                 PhoneNumber = x.PhoneNumber,
             }).ToListAsync();
-         
+
             return new JsonResult(
                 applicationUsers,
                 new JsonSerializerOptions
                 {
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 });
+        }
+        [HttpGet]
+        [ODataRoute("({userId})/roles")]
+        [EnableQuery(MaxExpansionDepth = 6, PageSize = 25)]
+        public async Task<IActionResult> GetAllRoles(Guid userId, CancellationToken token)
+        {
+            var roles = await applicationDbContext.Roles.Select(x=> x.Name).ToListAsync();
+
+            if(userId != Guid.Empty)
+            {
+                roles.Clear();
+                var userRoles = await this.applicationDbContext.UserRoles.Where(ur => ur.UserId == userId).Select(c => c.RoleId).ToListAsync();
+                foreach (var roleId in userRoles)
+                {
+                    var role = await this.applicationDbContext.Roles.Where(r => r.Id == roleId).Select(x=>x.Name).FirstOrDefaultAsync();
+                    roles.Add(role);
+                }
+            }
+            
+            return new JsonResult(
+               roles,
+               new JsonSerializerOptions
+               {
+                   DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+               });
         }
 
         /// <summary>
@@ -73,7 +99,8 @@ namespace ODataDemo.Controllers
         {
             UserModel UserModel = new UserModel();
             var apUsers = await this.applicationDbContext.Users.Where(w => w.Id == userId).FirstOrDefaultAsync();
-            UserModel = new UserModel {
+            UserModel = new UserModel
+            {
                 Id = apUsers.Id,
                 UserId = apUsers.UserId,
                 Email = apUsers.Email,
@@ -87,7 +114,7 @@ namespace ODataDemo.Controllers
 
         [HttpPatch]
         [ODataRoute("({userId})")]
-        public async Task<IActionResult> PatchUserService(Guid userId,[FromBody] Delta<UserModel> delta, CancellationToken token)
+        public async Task<IActionResult> PatchUserService(Guid userId, [FromBody] Delta<UserModel> delta, CancellationToken token)
         {
             IQueryable<ApplicationUser> query = applicationDbContext.Users.Where(w => w.Id == userId);
             ApplicationUser? user = await query.SingleOrDefaultAsync();
@@ -120,7 +147,7 @@ namespace ODataDemo.Controllers
                 Email = companyUser.Email,
                 IsApproved = true,
                 EmailConfirmed = true,
-                SecurityStamp = Guid.NewGuid().ToString(),
+                PhoneNumber =companyUser.PhoneNumber,
             };
             var result = await _userManager.CreateAsync(user, companyUser.Password);
             if (result.Succeeded)
@@ -136,5 +163,7 @@ namespace ODataDemo.Controllers
             await applicationDbContext.SaveChangesAsync(token).ConfigureAwait(false);
             return Ok(user);
         }
+
+        
     }
 }

@@ -1,0 +1,122 @@
+﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.form-container {
+    display: flex;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    margin-right: 10px;
+}
+
+.md-label {
+    padding-left: 50px;
+    padding-top: 15px;
+    color: #9b9b9b;
+}
+
+
+.page-header-rect {
+    width: 100%;
+    height: 100px;
+    margin: 2px 0 9px;
+    padding: 27px 43px 28px 33px;
+    box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.15);
+    background-color: #fff;
+}
+
+.inbound-container {
+    position: relative;
+}
+.add__btn {
+    position: absolute;
+    background-color: #009cff;
+    border-radius: 50px;
+    right: 129px;
+    top: -21px;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    padding: 12px 15px;
+    cursor: pointer;
+}
+.inbound-container .receive-shipment-btn {
+    top: -80px;
+    right: 50px;
+
+}
+.md-pop-text {
+    width: 277px;
+    height: 52px;
+    margin: 0 0 8px 24px;
+    padding: 5px 14px 6px 17px;
+    border-radius: 26px;
+    box-shadow: 0 0 8px 1px rgba(192, 192, 192, 0.5);
+    border: solid 0.5px #d5d5d5;
+    background-color: #fff;
+}
+.header-text {
+    width: 313px;
+    height: 24px;
+    margin: 0px 31px 25px 0;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #009cff;
+}
+x-mark {
+    width: 13.5px;
+    height: 13.5px;
+    margin: 0 0.7px 35.5px 10.1px;
+    object-fit: contain;
+}
+.cq-one {
+    margin-bottom: 10px;
+    display: flex;
+}
+.cq-two {
+    justify-content: space-between;
+}
+.float-label {
+    position: relative;
+}
+.modal-dialog {
+    max-width: 650px;
+    margin: 1.75rem auto;
+    border-radius: 8px;
+    margin-top: 1.75rem;
+    margin-right: auto;
+    margin-bottom: 1.75rem;
+    margin-left: auto;
+    box-shadow: 0 0 14px 3px rgba(0, 156, 255, 0.25);
+    background-color: #fff;
+}
+img.X-img {
+    width: 13.5px;
+    height: 13.5px;
+    margin: 3px 4.5px 30.5px 15px;
+    object-fit: contain;
+}
+.password-container {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+    .password-toggle i {
+        font-size: 20px;
+    }

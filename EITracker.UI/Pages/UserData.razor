@@ -5,11 +5,11 @@
 @inject HttpClient Http
 <PageTitle>Eco Insight</PageTitle>
 
-<div>
-    <h1>EI Employees</h1>
+<div class="page-header-rect">
+    <h1 class="header-text">EI Employees</h1>
 </div>
 
-
+<div class="inbound-container"><div class="add__btn receive-shipment-btn" @onclick="() => Open()">Add Employee</div></div>
 
 @if (userModels == null)
 {
@@ -34,7 +34,7 @@ else
                     <td>@user.UserId</td>
                     <td>@user.FirstName  @user.LastName</td>
                     <td>@user.Email</td>
-                    <td>@user.PhoneNumber</td>                  
+                    <td>@user.PhoneNumber</td>
                     <td>
                         <button class="btn btn-sm btn-primary"
                         @onclick="() => EditAsync(user.Id)">
@@ -50,31 +50,70 @@ else
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">User Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h4 class="header-text">User Details</h4>
+                    <img src="X-img.png"
+                         srcset="X-img2x.png 2x, X-img3x.png 3x"
+                         class="X-img" @onclick="() => Close()">
+
                 </div>
-                <div class="modal-body">
-                    <label for="FirstName">FirstName:</label>
-                    <input @bind-value="userModel.FirstName" type="text" id="FirstName" name="FirstName"><br><br>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label class="md-label" for="FirstName">First Name</label>
+                        <input @bind-value="userModel.FirstName" class="md-pop-text" type="text" id="FirstName" name="FirstName">
+                    </div>
+                    <div class="form-group">
+                        <label class="md-label" for="LastName">Last Name</label>
+                        <input @bind-value="userModel.LastName" class="md-pop-text" type="text" id="LastName" name="LastName">
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <label for="LastName">LastName:</label>
-                    <input @bind-value="userModel.LastName" type="text" id="LastName" name="LastName"><br><br>
+                @if (userModel.Id == Guid.Empty)
+                {
+                    <div class="form-container">
+                        <div class="form-group">
+                            <label class="md-label" for="FirstName">Employee Id</label>
+                            <input @bind-value="userModel.UserId" class="md-pop-text" type="text" id="Userid" name="Userid">
+                        </div>
+                        <div class="form-group">
+                            <label class="md-label" for="Pass">Password</label>
+                            <input @bind-value="userModel.Password" class="md-pop-text" type="password" id="paswd" name="paswd">
+                        </div>
+                    </div>
+
+                }
+                <div class="form-container">
+                    <div class="form-group">
+                        <label class="md-label"  for="Email">Email</label>
+                        <input @bind-value="userModel.Email" class="md-pop-text" type="text" id="Email" name="Email">
+                    </div>
+                    <div class="form-group">
+                        <label class="md-label" for="Phone">Contact</label>
+                        <input @bind-value="userModel.PhoneNumber" class="md-pop-text" type="text" id="Phone" name="Phone">
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <label for="Email">Email:</label>
-                    <input @bind-value="userModel.Email" type="text" id="Email" name="Email"><br><br>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label class="md-label" for="Phone">Roles</label>
+                        <select @bind="selectedValue" class="md-pop-text" onchange1="OnDropdownChange">
+                            @foreach (var item in roles)
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <label for="Phone">Contact:</label>
-                    <input @bind-value="userModel.PhoneNumber" type="text" id="Phone" name="Phone"><br><br>
-                </div>
-             
+
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
-                    <button type="button" class="btn btn-primary" @onclick="() => Done(userModel)">Done</button>
+                    @if (userModel.Id != Guid.Empty)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="() => Update(userModel)">Update</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="() => Post(userModel)">Save</button>
+                    }
                 </div>
             </div>
         </div>
@@ -96,14 +135,26 @@ else
     public string ModalClass = "";
     public bool ShowBackdrop = false;
     private List<UserModel>? userModels;
+    private List<string> roles = new List<string>();
     private UserModel? userModel = new UserModel();
+    private string selectedValue = "Default";
+    private void OnDropdownChange(ChangeEventArgs e)
+    {
+        selectedValue = e.Value.ToString();
+    }
     protected override async Task OnInitializedAsync()
     {
         await GetAllUsers();
+        await GetAllRoles();
     }
     private async Task GetAllUsers()
     {
         userModels = await userService.GetAllUsersAsync();
+
+    }
+    private async Task GetAllRoles()
+    {
+        roles = await userService.GetAllRolesAsync();
     }
 
     private async Task EditAsync(Guid uid)
@@ -125,17 +176,28 @@ else
         ModalDisplay = "none";
         ModalClass = "";
         ShowBackdrop = false;
+        userModel = new();
         StateHasChanged();
+
     }
-    public async Task Done(UserModel user)
+    public async Task Update(UserModel user)
     {
-        userService.PatchUserAsync(user,tokenSource.Token);
+        userService.PatchUserAsync(user, tokenSource.Token);
         userModels = new List<UserModel>();
         userModels = await userService.GetAllUsersAsync();
         Close();
     }
-    private async Task RefreshTable()
+
+    public async Task Post(UserModel user)
     {
-        await JSRuntime.InvokeVoidAsync("refreshTable");
+        user.Roles = new List<string>
+        {
+            selectedValue
+        };
+        user.SendEmail = true;
+        userService.PostUserAsync(user, tokenSource.Token);
+        Close();
     }
+
+
 }

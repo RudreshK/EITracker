@@ -81,10 +81,12 @@ app.UseMvc(options =>
     builder.EntitySet<AuthorModel>("Authors");
     builder.EntitySet<CustomerModel>("Customers");
     builder.EntitySet<ProductModel>("Products");
+    builder.EntitySet<UserModel>("Users").EntityType.Action("Roles");
+    var roles = builder.Action("Roles");
     var AppUser = builder.EntitySet<UserModel>("Users");
     AppUser.EntityType.Action("PostUser");
     AppUser.EntityType.Action("GetAllUsers");
-
+   
     var edmModel = builder.GetEdmModel();
     options.Expand().Select().Filter().Count().OrderBy();
     options.MapODataServiceRoute("RouteServices", "api", edmModel);

@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\css\User-data.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Shared\MainLayout.razor" />
     <None Include="Shared\NavMenu.razor" />
     <None Include="Shared\SurveyPrompt.razor" />
@@ -29,7 +33,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.9" />
-    <PackageReference Include="MudBlazor" Version="6.11.0" />
   </ItemGroup>
 
   <ItemGroup>
