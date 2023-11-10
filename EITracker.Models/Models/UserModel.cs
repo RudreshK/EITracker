@@ -4,7 +4,7 @@
 
 namespace EITracker.Models
 {
-    public class UserModel
+    public class UserModel //: EditableModelFields
     {             
         public Guid Id { get; set; }
         public string FirstName { get; set; }
@@ -15,6 +15,11 @@ namespace EITracker.Models
         public List<string> Roles { get; set; }
         public string? Password { get; set; }
         public bool? SendEmail { get; set; }
+        public bool IsActive { get; set; }
+
+        public DateTimeOffset DOB { get; set; }
+        public DateTimeOffset DOJ { get; set; }
+        public DateTimeOffset? DOR { get; set; }
 
     }
 }

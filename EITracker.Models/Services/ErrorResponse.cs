@@ -4,8 +4,8 @@
 // </copyright>
 // ------------------------------------------------------------------------------
 
-namespace ODataDemo.Services
-{
+namespace EITracker.Models
+{ 
     public class ErrorResponse
     {
         public Error? error { get; set; }

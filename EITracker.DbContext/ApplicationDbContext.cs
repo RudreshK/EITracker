@@ -5,8 +5,10 @@
 // ------------------------------------------------------------------------------
 
 using EITracker.DbContext.Dbo;
+using EITracker.DbContext.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace EITracker.DbContext
 
@@ -24,7 +26,16 @@ namespace EITracker.DbContext
         
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder);         
+
+            base.OnModelCreating(builder);
+            builder.Entity<ApplicationUser>(author =>
+            {
+                author.HasKey(t => t.Id);
+                author.Property(t => t.Id).ValueGeneratedOnAdd().IsRequired();
+                author.Property(t => t.CreatedTime).ValueGeneratedOnAdd().IsRequired();
+                author.Property(t => t.ModifiedTime).ValueGeneratedOnAdd().IsRequired();
+                author.Property(t => t.ConcurrencyStamp).IsRowVersion();
+            });
         }
     }
 }

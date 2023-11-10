@@ -1,4 +1,9 @@
-﻿
+﻿// -----------------------------------------------------------------------------
+// <copyright file="UserProfile.cs" company="ecoInsight, Inc.">
+// Copyright © ecoInsight Inc. All rights reserved.
+// </copyright>
+// ------------------------------------------------------------------------------
+
 using AutoMapper;
 using EITracker.DbContext.Dbo;
 
@@ -32,7 +37,34 @@ namespace EITracker.Models.Profiles
                 .ForMember(
                     model => model.PhoneNumber,
                     opts => opts.MapFrom(data => data.PhoneNumber))
+
+                //    .ForMember(
+                //    model => model.CreatedById,
+                //    opts => opts.MapFrom(data => data.CreatedById))
+                //.ForMember(
+                //    model => model.Created,
+                //    opts => opts.MapFrom(data => (DateTimeOffset)data.CreatedTime))
+                //.ForMember(
+                //    model => model.ModifiedById,
+                //    opts => opts.MapFrom(data => data.ModifiedById))
+                //.ForMember(
+                //    model => model.Modified,
+                //    opts => opts.MapFrom(data => (DateTimeOffset)data.ModifiedTime))
+
+
                  .ReverseMap()
+                //  .ForMember(
+                //    data => data.CreatedById,
+                //    opts => opts.MapFrom(model => model.CreatedById))
+                //.ForMember(
+                //    data => data.CreatedTime,
+                //    opts => opts.MapFrom(model => model.Created.DateTime))
+                //.ForMember(
+                //    data => data.ModifiedById,
+                //    opts => opts.MapFrom(model => model.ModifiedById))
+                //.ForMember(
+                //    data => data.ModifiedTime,
+                //    opts => opts.MapFrom(model => model.Modified.DateTime))
                   .ForMember(
                     data => data.Id,
                     opts => opts.MapFrom(model => model.Id))

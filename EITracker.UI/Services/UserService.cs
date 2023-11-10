@@ -51,6 +51,15 @@ namespace EITracker.UI.Services
             request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.SendAsync(request,token);
+            ServiceResponse res = new ServiceResponse();
+            if (!response.IsSuccessStatusCode)
+            {
+                res.StatusCode=(int) response.StatusCode;
+                
+            }
+            var exception = await response.Content.ReadAsStringAsync();
+            var exc = JsonConvert.DeserializeObject<ErrorResponse>(exception);
+       
         }
     }
 }

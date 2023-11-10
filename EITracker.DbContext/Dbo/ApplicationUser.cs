@@ -30,7 +30,18 @@ namespace EITracker.DbContext.Dbo
         /// <summary>
         /// Gets or set IsApproved
         /// </summary>
-        public bool IsApproved { get; set; }
 
+        public bool IsApproved { get; set; }
+        public bool IsActive { get; set; }
+
+        public DateTime DOB { get; set; }
+        public DateTime DOJ { get; set; }
+        public DateTime? DOR { get; set; }
+
+        public Guid CreatedById { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public Guid ModifiedById { get; set; }
+        public DateTime ModifiedTime { get; set; }
+        public byte[] ConcurrencyStamp { get; set; }
     }
 }

@@ -66,7 +66,7 @@ builder.Services.AddMvc(option => option.EnableEndpointRouting = false);
 builder.Services.AddOData();
 
 var app = builder.Build();
-app.MapGet("/", () => "OData Demo");
+app.MapGet("/", () => "Blazor WEBAPI Demo");
 app.UseRouting();
 app.UseEndpoints(endpoints =>
 {

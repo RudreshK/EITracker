@@ -2,6 +2,7 @@
 using EITracker.DbContext;
 using EITracker.DbContext.Dbo;
 using EITracker.Models;
+using EITracker.WebApi.Controllers;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ODataDemo.Services;
 using System.Data;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -139,7 +141,7 @@ namespace ODataDemo.Controllers
             }
             var user = new ApplicationUser
             {
-                UserId = companyUser.UserId,
+                UserId =await this.GetUniqueEmployeeNumber(token),
                 FirstName = companyUser.FirstName,
                 LastName = companyUser.LastName,
                 UserName = companyUser.Email,
@@ -148,22 +150,76 @@ namespace ODataDemo.Controllers
                 IsApproved = true,
                 EmailConfirmed = true,
                 PhoneNumber =companyUser.PhoneNumber,
+                DOB = companyUser.DOB.DateTime,
+                DOJ = companyUser.DOJ.DateTime,
+                IsActive = true,
+                CreatedTime = DateTime.UtcNow,
+                ModifiedTime =DateTime.UtcNow
             };
-            var result = await _userManager.CreateAsync(user, companyUser.Password);
-            if (result.Succeeded)
+            try
             {
-                await _userManager.AddToRolesAsync(user, companyUser.Roles);
+                var result = await _userManager.CreateAsync(user, companyUser.Password);
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRolesAsync(user, companyUser.Roles);
+                }
+                else
+                {
+                    var errorResponse = new ErrorResponse();
+                    errorResponse.error = new Error(result.Errors.First().Code, result.Errors.First().Description);
+                    return this.BadRequest(errorResponse);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var errorResponse = new ErrorResponse();
-                errorResponse.error = new Error(result.Errors.First().Code, result.Errors.First().Description);
-                return this.BadRequest(errorResponse);
+                return BadRequest();
+
             }
+                     
             await applicationDbContext.SaveChangesAsync(token).ConfigureAwait(false);
             return Ok(user);
         }
 
-        
+        /// <summary>
+        /// Get unique Pick Ticket Number
+        /// </summary>
+        /// <param name="eRPPO"></param>
+        /// <returns></returns>
+        private async Task<string> GetUniqueEmployeeNumber(CancellationToken token)
+        {
+            string emp = "EI";
+            var user = await (this.applicationDbContext.Users.Where(t => t.UserId.StartsWith($"{emp}-"))
+                .OrderByDescending(x => x.CreatedTime).FirstOrDefaultAsync(token));
+            const int maxUniqueNumber = 99;
+            int uniqueNumber = 1;
+            if (user == null)
+            {
+                return $"{emp}-{uniqueNumber:000}";
+            }
+            else
+            {
+                int index = user.UserId.Split('-').Length;
+                if (user.UserId.Split('-').Length > 1)
+                {
+                   _ = int.TryParse(user.UserId.Split('-')[index - 1].PadLeft(index, '0')[..3], out uniqueNumber);
+                   
+                }
+                StringBuilder numberToReturn = new($"{emp}-{uniqueNumber:000}");
+
+                numberToReturn.Clear();
+                if (uniqueNumber == maxUniqueNumber)
+                {
+                    uniqueNumber = 1;
+                    numberToReturn.Append($"{emp}-{uniqueNumber:000}");
+                }
+                else
+                {
+                    ++uniqueNumber;
+                    numberToReturn.Append($"{emp}-{uniqueNumber:000}");
+                }
+                return numberToReturn.ToString();
+            }
+        }
+
     }
 }

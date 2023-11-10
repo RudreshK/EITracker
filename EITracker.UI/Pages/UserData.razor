@@ -13,7 +13,7 @@
 
 @if (userModels == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="loader">Loading...</div>
 }
 else
 {
@@ -88,6 +88,16 @@ else
                     <div class="form-group">
                         <label class="md-label" for="Phone">Contact</label>
                         <input @bind-value="userModel.PhoneNumber" class="md-pop-text" type="text" id="Phone" name="Phone">
+                    </div>
+                </div>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label class="md-label" >Date of Birth</label>
+                        <input @bind-value="userModel.DOB" class="md-pop-text" type="date" id="dob" name="dob">
+                    </div>
+                    <div class="form-group">
+                        <label class="md-label" >Date of Jion</label>
+                        <input @bind-value="userModel.DOJ" class="md-pop-text" type="date" id="doj" name="doj">
                     </div>
                 </div>
                 <div class="form-container">
