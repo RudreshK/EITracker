@@ -1,8 +1,11 @@
 ﻿
+using System.Data;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using EITracker.DbContext;
 using EITracker.DbContext.Dbo;
 using EITracker.Models;
-using EITracker.WebApi.Controllers;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
@@ -10,10 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ODataDemo.Services;
-using System.Data;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+
 
 namespace ODataDemo.Controllers
 {
@@ -43,8 +43,9 @@ namespace ODataDemo.Controllers
         [EnableQuery(MaxExpansionDepth = 6, PageSize = 25)]
         public async Task<IActionResult> GetAllUsers(ODataQueryOptions<UserModel> options, CancellationToken token)
         {
+
             List<UserModel> UserModel = new List<UserModel>();
-            var applicationUsers = await this.applicationDbContext.Users.Select(x => new UserModel
+            var applicationUsers = await this.applicationDbContext.Users.Skip(0).Take(25).Select(x => new UserModel
             {
                 Id = x.Id,
                 UserId = x.UserId,
@@ -52,6 +53,8 @@ namespace ODataDemo.Controllers
                 FirstName = x.FirstName,
                 LastName = x.LastName,
                 PhoneNumber = x.PhoneNumber,
+                DOB = x.DOB,
+                DOJ = x.DOJ,
             }).ToListAsync();
 
             return new JsonResult(
@@ -61,6 +64,7 @@ namespace ODataDemo.Controllers
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 });
         }
+
         [HttpGet]
         [ODataRoute("({userId})/roles")]
         [EnableQuery(MaxExpansionDepth = 6, PageSize = 25)]
@@ -110,6 +114,8 @@ namespace ODataDemo.Controllers
                 LastName = apUsers.LastName,
                 Roles = (List<string>)await _userManager.GetRolesAsync(apUsers),
                 PhoneNumber = apUsers.PhoneNumber,
+                DOB = apUsers.DOB,
+                DOJ = apUsers.DOJ,
             };
             return Ok(UserModel);
         }

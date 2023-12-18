@@ -30,7 +30,6 @@ namespace EITracker.DbContext.Dbo
         /// <summary>
         /// Gets or set IsApproved
         /// </summary>
-
         public bool IsApproved { get; set; }
         public bool IsActive { get; set; }
 
@@ -43,5 +42,6 @@ namespace EITracker.DbContext.Dbo
         public Guid ModifiedById { get; set; }
         public DateTime ModifiedTime { get; set; }
         public byte[] ConcurrencyStamp { get; set; }
+
     }
 }

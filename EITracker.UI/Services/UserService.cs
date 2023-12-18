@@ -42,8 +42,9 @@ namespace EITracker.UI.Services
                 var response = await _httpClient.SendAsync(request,token);
 
         }
-        public async Task PostUserAsync(UserModel user, CancellationToken token)
-        {          
+        public async Task<ServiceResponse> PostUserAsync(UserModel user, CancellationToken token)
+        {
+
             var apiUrl = "api/Users";
 
             // Create the request message
@@ -55,11 +56,10 @@ namespace EITracker.UI.Services
             if (!response.IsSuccessStatusCode)
             {
                 res.StatusCode=(int) response.StatusCode;
-                
+                ErrorResponse exception = JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync());
+                res.StatusMessage = exception.error.message;
             }
-            var exception = await response.Content.ReadAsStringAsync();
-            var exc = JsonConvert.DeserializeObject<ErrorResponse>(exception);
-       
+            return res;      
         }
     }
 }

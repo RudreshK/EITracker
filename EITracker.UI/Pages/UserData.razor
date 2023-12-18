@@ -2,9 +2,9 @@
 @using EITracker.Models;
 @using EITracker.UI.Services;
 @inject IUserService userService;
-@inject HttpClient Http
-<PageTitle>Eco Insight</PageTitle>
+@inject HttpClient Http;
 
+<PageTitle>Eco Insight</PageTitle>
 <div class="page-header-rect">
     <h1 class="header-text">EI Employees</h1>
 </div>
@@ -24,6 +24,8 @@ else
                 <th>Name</th>
                 <th>Email</th>
                 <th>Contact</th>
+                <th>Date Of Birth</th>
+                <th>Date Of Join</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -35,11 +37,11 @@ else
                     <td>@user.FirstName  @user.LastName</td>
                     <td>@user.Email</td>
                     <td>@user.PhoneNumber</td>
+                    <td>@user.DOB.ToString("dd MMM yyyy")</td>
+                    <td>@user.DOJ.ToString("dd MMM yyyy")</td>
                     <td>
-                        <button class="btn btn-sm btn-primary"
-                        @onclick="() => EditAsync(user.Id)">
-                            Edit
-                        </button>
+                        <i class="fa fa-edit" title="Edit" style="color : rgb(0, 156, 247)" @onclick="() => EditAsync(user.Id)"> </i>
+                        @*   <i class="fa fa-trash" title="Delete" @onclick="() => EditAsync(user.Id)"> </i>          *@
                     </td>
                 </tr>
             }
@@ -53,7 +55,7 @@ else
                     <h4 class="header-text">User Details</h4>
                     <img src="X-img.png"
                          srcset="X-img2x.png 2x, X-img3x.png 3x"
-                         class="X-img" @onclick="() => Close()">
+                         class="X-img" @onclick="() => ModelClose()">
 
                 </div>
                 <div class="form-container">
@@ -82,7 +84,7 @@ else
                 }
                 <div class="form-container">
                     <div class="form-group">
-                        <label class="md-label"  for="Email">Email</label>
+                        <label class="md-label" for="Email">Email</label>
                         <input @bind-value="userModel.Email" class="md-pop-text" type="text" id="Email" name="Email">
                     </div>
                     <div class="form-group">
@@ -92,12 +94,12 @@ else
                 </div>
                 <div class="form-container">
                     <div class="form-group">
-                        <label class="md-label" >Date of Birth</label>
-                        <input @bind-value="userModel.DOB" class="md-pop-text" type="date" id="dob" name="dob">
+                        <label class="md-label">Date of Birth</label>
+                        <input @bind-value="userModel.DOB" placeholder="Date of Birth" class="md-pop-text" type="date" id="dob" name="dob">
                     </div>
                     <div class="form-group">
-                        <label class="md-label" >Date of Jion</label>
-                        <input @bind-value="userModel.DOJ" class="md-pop-text" type="date" id="doj" name="doj">
+                        <label class="md-label">Date of Jion</label>
+                        <input @bind-value="userModel.DOJ" placeholder="Date of Join" class="md-pop-text" type="date" id="doj" name="doj">
                     </div>
                 </div>
                 <div class="form-container">
@@ -115,7 +117,7 @@ else
 
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => ModelClose()">Close</button>
                     @if (userModel.Id != Guid.Empty)
                     {
                         <button type="button" class="btn btn-primary" @onclick="() => Update(userModel)">Update</button>
@@ -148,6 +150,9 @@ else
     private List<string> roles = new List<string>();
     private UserModel? userModel = new UserModel();
     private string selectedValue = "Default";
+    private DateTime selectedDate = DateTime.Today;
+    userModel.DOB = selectedDate;
+    userModel.DOJ = selectedDate;
     private void OnDropdownChange(ChangeEventArgs e)
     {
         selectedValue = e.Value.ToString();
@@ -170,6 +175,7 @@ else
     private async Task EditAsync(Guid uid)
     {
         userModel = await userService.GetUserByIdAsync(uid);
+        roles = userModel.Roles;
         this.Open();
     }
 
@@ -181,7 +187,7 @@ else
         StateHasChanged();
     }
 
-    public void Close()
+    public void ModelClose()
     {
         ModalDisplay = "none";
         ModalClass = "";
@@ -195,7 +201,7 @@ else
         userService.PatchUserAsync(user, tokenSource.Token);
         userModels = new List<UserModel>();
         userModels = await userService.GetAllUsersAsync();
-        Close();
+        ModelClose();
     }
 
     public async Task Post(UserModel user)
@@ -205,8 +211,19 @@ else
             selectedValue
         };
         user.SendEmail = true;
-        userService.PostUserAsync(user, tokenSource.Token);
-        Close();
+        ServiceResponse response = await userService.PostUserAsync(user, tokenSource.Token);
+
+        // if (response != null && response.StatusCode == 400)
+        // {
+        //     var confirm = await js.InvokeAsync<bool>("messegealert", "warning..", response.StatusMessage, "warning");
+        //     StateHasChanged();
+        // }
+        // else
+        // {
+        //     await js.InvokeAsync<bool>("successalert", "User Details Saved!");
+        //     ModelClose();
+        //     userModels = await userService.GetAllUsersAsync();
+        // }
     }
 
 

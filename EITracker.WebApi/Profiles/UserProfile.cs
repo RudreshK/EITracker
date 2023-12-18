@@ -6,8 +6,9 @@
 
 using AutoMapper;
 using EITracker.DbContext.Dbo;
+using EITracker.Models;
 
-namespace EITracker.Models.Profiles
+namespace EITracker.Profiles
 {
     public class UserProfile : Profile
     {

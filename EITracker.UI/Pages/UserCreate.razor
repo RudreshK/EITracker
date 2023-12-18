@@ -1,19 +1,30 @@
 ﻿@page "/user-edit";
 
+<h1>Build a component</h1>
 
-<h3>User Create</h3>
-<EditForm>
 <div>
-
+    @CustomRender
 </div>
 
-
-
-
-</EditForm>
-
-
+<button @onclick="RenderComponent">
+    Create three Pet Details components
+</button>
 
 @code {
+    private RenderFragment? CustomRender { get; set; }
 
+    private RenderFragment CreateComponent() => builder =>
+    {
+        for (var i = 0; i < 9; i++)
+        {
+            builder.OpenComponent(0, typeof(PetDetails));
+            builder.AddAttribute(1, "PetDetailsQuote", "Someone's best friend!");
+            builder.CloseComponent();
+        }
+    };
+
+    private void RenderComponent()
+    {
+        CustomRender = CreateComponent();
+    }
 }

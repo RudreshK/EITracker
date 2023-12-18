@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using EITracker.DbContext.Entities;
+using EITracker.Models;
 
-namespace EITracker.Models.Profiles
+namespace EITracker.Profiles
 {
     public class EmployeeLeaveProfile : Profile
     {

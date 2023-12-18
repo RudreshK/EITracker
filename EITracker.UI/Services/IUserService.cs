@@ -8,6 +8,6 @@ namespace EITracker.UI.Services
         public Task<List<string>> GetAllRolesAsync();
         public Task<UserModel> GetUserByIdAsync(Guid userId);
         public Task PatchUserAsync(UserModel user, CancellationToken token);
-        public Task PostUserAsync(UserModel user, CancellationToken token);
+        public Task<ServiceResponse> PostUserAsync(UserModel user, CancellationToken token);
     }
 }
