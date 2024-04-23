@@ -151,8 +151,8 @@ else
     private UserModel? userModel = new UserModel();
     private string selectedValue = "Default";
     private DateTime selectedDate = DateTime.Today;
-    userModel.DOB = selectedDate;
-    userModel.DOJ = selectedDate;
+    // userModel.DOB = selectedDate;
+    // userModel.DOJ = selectedDate;
     private void OnDropdownChange(ChangeEventArgs e)
     {
         selectedValue = e.Value.ToString();

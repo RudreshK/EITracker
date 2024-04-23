@@ -1,4 +1,5 @@
 
+using Blazored.LocalStorage;
 using EITracker.UI.Data;
 using EITracker.UI.Services;
 
@@ -10,6 +11,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddTransient<IChatManager, ChatManager>();
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddHttpClient<IUserService, UserService>(client => client.BaseAddress = new Uri("https://localhost:7082/"));
 
 

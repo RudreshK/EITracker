@@ -110,6 +110,7 @@ namespace EITracker.WebApi
             services.AddSingleton(mapper);
             services.AddSingleton<ITypeMapper, TypeMapper>();
             services.AddScoped<UserManager<ApplicationUser>>();
+            services.AddSingleton<JwtService>(new JwtService("your-secret-key"));
             services.AddMvc(option => option.EnableEndpointRouting = false);
             services.AddOData();
 

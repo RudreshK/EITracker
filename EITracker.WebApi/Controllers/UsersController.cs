@@ -5,10 +5,13 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EITracker.DbContext;
 using EITracker.DbContext.Dbo;
+using EITracker.Enums;
+using EITracker.Model;
 using EITracker.Models;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +28,7 @@ namespace ODataDemo.Controllers
         private readonly IConfiguration Configuration;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext applicationDbContext;
+
         public UsersController(ITypeMapper mapper, IConfiguration configuration, UserManager<ApplicationUser> userManager, ApplicationDbContext applicationDbContext)
         {
             this._mapper = mapper;
@@ -32,6 +36,9 @@ namespace ODataDemo.Controllers
             this._userManager = userManager;
             this.applicationDbContext = applicationDbContext;
         }
+
+
+
         /// <summary>
         /// Get All Users
         /// </summary>
@@ -70,19 +77,19 @@ namespace ODataDemo.Controllers
         [EnableQuery(MaxExpansionDepth = 6, PageSize = 25)]
         public async Task<IActionResult> GetAllRoles(Guid userId, CancellationToken token)
         {
-            var roles = await applicationDbContext.Roles.Select(x=> x.Name).ToListAsync();
+            var roles = await applicationDbContext.Roles.Select(x => x.Name).ToListAsync();
 
-            if(userId != Guid.Empty)
+            if (userId != Guid.Empty)
             {
                 roles.Clear();
                 var userRoles = await this.applicationDbContext.UserRoles.Where(ur => ur.UserId == userId).Select(c => c.RoleId).ToListAsync();
                 foreach (var roleId in userRoles)
                 {
-                    var role = await this.applicationDbContext.Roles.Where(r => r.Id == roleId).Select(x=>x.Name).FirstOrDefaultAsync();
+                    var role = await this.applicationDbContext.Roles.Where(r => r.Id == roleId).Select(x => x.Name).FirstOrDefaultAsync();
                     roles.Add(role);
                 }
             }
-            
+
             return new JsonResult(
                roles,
                new JsonSerializerOptions
@@ -147,7 +154,7 @@ namespace ODataDemo.Controllers
             }
             var user = new ApplicationUser
             {
-                UserId =await this.GetUniqueEmployeeNumber(token),
+                UserId = await this.GetUniqueEmployeeNumber(token),
                 FirstName = companyUser.FirstName,
                 LastName = companyUser.LastName,
                 UserName = companyUser.Email,
@@ -155,12 +162,12 @@ namespace ODataDemo.Controllers
                 Email = companyUser.Email,
                 IsApproved = true,
                 EmailConfirmed = true,
-                PhoneNumber =companyUser.PhoneNumber,
+                PhoneNumber = companyUser.PhoneNumber,
                 DOB = companyUser.DOB.DateTime,
                 DOJ = companyUser.DOJ.DateTime,
                 IsActive = true,
                 CreatedTime = DateTime.UtcNow,
-                ModifiedTime =DateTime.UtcNow
+                ModifiedTime = DateTime.UtcNow
             };
             try
             {
@@ -181,7 +188,7 @@ namespace ODataDemo.Controllers
                 return BadRequest();
 
             }
-                     
+
             await applicationDbContext.SaveChangesAsync(token).ConfigureAwait(false);
             return Ok(user);
         }
@@ -207,8 +214,8 @@ namespace ODataDemo.Controllers
                 int index = user.UserId.Split('-').Length;
                 if (user.UserId.Split('-').Length > 1)
                 {
-                   _ = int.TryParse(user.UserId.Split('-')[index - 1].PadLeft(index, '0')[..3], out uniqueNumber);
-                   
+                    _ = int.TryParse(user.UserId.Split('-')[index - 1].PadLeft(index, '0')[..3], out uniqueNumber);
+
                 }
                 StringBuilder numberToReturn = new($"{emp}-{uniqueNumber:000}");
 
