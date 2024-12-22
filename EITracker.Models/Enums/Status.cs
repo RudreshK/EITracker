@@ -11,5 +11,10 @@ namespace EITracker.Enums
 
         /// <summary>Error.</summary>
         Error = 2,
+
+        /// <summary>
+        /// Fail
+        /// </summary>
+        Fail = 3,
     }
 }

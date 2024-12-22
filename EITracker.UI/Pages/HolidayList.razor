@@ -1,0 +1,106 @@
+﻿@page "/holidaylist"
+@using EITracker.Models;
+@using EITracker.UI.Services;
+@inject HolidayListService holidayService
+@inject HttpClient Http;
+@inherits LayoutComponentBase
+@using AntDesign.TableModels
+
+<h3>Holiday List</h3>
+@if (holidays == null)
+{
+    <Icon Type="loading" Theme="twotone" Spin />
+}
+else
+{
+    <Form Model="@model"
+          OnFinish="OnFinish"
+          LabelColSpan="2"
+          WrapperColSpan="6">
+        <FormItem Label="Holiday Name">
+            <Input @bind-Value="@context.HolidayName" />
+        </FormItem>
+        <FormItem Label="Holiday Date">
+            <DatePicker @bind-Value="@context.HolidayDate" />
+        </FormItem>
+
+        <FormItem WrapperColOffset="2" WrapperColSpan="6">
+            <Button Type="@ButtonType.Primary" HtmlType="submit">
+                Add Holiday
+            </Button>
+        </FormItem>
+    </Form>
+   
+    <Table TItem="HolidayListModel" DataSource="@holidays" PageSize="5" OnRowClick="OnRowClick">
+        <Column @bind-Field="@context.HolidayDate" Title="Holiday Date">
+            @context.HolidayDate.ToString("dd MMM yyyy")
+        </Column>
+        <Column @bind-Field="@context.HolidayName">
+            <TitleTemplate>
+                <span> <Icon Type="schedule" Theme="twotone" /> Event </span>
+            </TitleTemplate>
+        </Column>
+        <Column @bind-Field="@context.WeekDay">
+            <TitleTemplate>
+                <span> <Icon Type="smile" Theme="twotone" /> Week Day </span>
+            </TitleTemplate>
+        </Column>      
+        <ActionColumn Title="Action">
+            <Space Size=@("medium")>             
+                <SpaceItem>
+                    <a><Icon Type="delete" Theme="twotone" /></a>
+                </SpaceItem>
+            </Space>
+        </ActionColumn>
+    </Table>
+}
+@code
+{
+
+    private readonly CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(300));
+   
+    private HolidayListModel[] holidays;
+    private Data model = new Data();
+    private HolidayListModel holiday;
+  
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllHolidays();
+    }
+    private async Task GetAllHolidays()
+    {
+        holidays = await holidayService.GetAllHolidaysAsync();
+        
+    }
+    private async Task OnFinish(EditContext editContext)
+    {
+        DateTime date = model.HolidayDate;
+        DayOfWeek dayOfWeek = date.DayOfWeek;
+        holiday = new HolidayListModel
+            {
+                HolidayName = model.HolidayName,
+                HolidayDate = model.HolidayDate,
+                WeekDay = (Enums.WeekDays)dayOfWeek
+            };
+        var response = await holidayService.PostHolidayAsync(holiday, tokenSource.Token);
+        StateHasChanged();
+        await GetAllHolidays();
+    }
+   
+    public class Data 
+    {
+        public Guid HolidayId { get; set; }
+        public string HolidayName { get; set; }
+        public DateTime HolidayDate { get; set; } = DateTime.UtcNow;
+        public byte WeekDay { get; set; }
+    }
+    void OnRowClick(RowData<HolidayListModel> row)
+    {
+        var response =  holidayService.DeleteHoliday(row.Data.HolidayId, tokenSource.Token);
+        // Filter the holidays array to exclude the deleted item
+        holidays = holidays.Where(h => h.HolidayId != row.Data.HolidayId).ToArray();
+        // Notify the table to update
+        StateHasChanged();        
+    }
+   
+}

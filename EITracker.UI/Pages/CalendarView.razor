@@ -1,0 +1,121 @@
+﻿@page "/calendar"
+@using EITracker.Models;
+@using EITracker.UI.Services;
+@inject HolidayListService holidayService
+<h3>Calendar View</h3>
+
+<Calendar DateCellRender="DateCellRender" />
+
+@code
+{
+    private readonly CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(300));
+    private DateTime CurrentDate = DateTime.Now;
+
+    private List<HolidayListModel> holidays;
+    protected override async Task OnInitializedAsync()
+    {
+        // Preload all holiday data into the cache during initialization
+        var holidays = await holidayService.GetAllHolidaysByYearMonthAsync(CurrentDate); // Load for the year/month range you need
+        foreach (var holiday in holidays)
+        {
+            var holidayDate = holiday.HolidayDate.Date;
+            if (!holidayRenderCache.ContainsKey(holidayDate))
+            {
+                holidayRenderCache[holidayDate] = new List<HolidayListModel>();
+            }
+            holidayRenderCache[holidayDate].Add(holiday);
+        }
+    }
+    private async Task GetAllHolidays()
+    {
+        holidays = await holidayService.GetAllHolidaysByYearMonthAsync(CurrentDate);
+    }
+
+   
+    private RenderFragment DateCellRender(DateTime value) => builder =>
+    {
+    // Check if holidays are already fetched for this date
+    if (!holidayRenderCache.TryGetValue(value.Date, out var holidays))
+    {
+        // Trigger holiday loading if not already cached
+        _ = LoadHolidaysAsync(value.Date);
+        holidays = new List<HolidayListModel>(); // Show empty initially
+    }
+
+    if (holidays.Any(d => d.HolidayDate.Date == value.Date))
+    {
+        // Highlight the date with a special style
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "style", "border: 2px solid red; color: red; padding: 5px; text-align: center;");
+
+        // Render the events list for holidays on this date
+        builder.OpenElement(2, "ul");
+        builder.AddAttribute(3, "class", "events");
+
+        foreach (var holiday in holidays.Where(d => d.HolidayDate.Date == value.Date))
+        {
+            // Highlight each holiday name
+            builder.OpenElement(4, "li");
+            builder.AddAttribute(5, "style", "font-weight: bold; color: darkred;");
+
+            builder.OpenComponent<Badge>(6);
+            builder.AddAttribute(7, "Text", $"{holiday.HolidayName}");
+            builder.CloseComponent();
+
+            builder.CloseElement();
+        }
+
+        builder.CloseElement(); // Close <ul>
+        builder.CloseElement(); // Close <div>
+    }
+    };
+
+
+    private async Task LoadHolidaysAsync(DateTime date)
+    {
+    // Avoid multiple concurrent fetches for the same date
+        if (!holidayRenderCache.ContainsKey(date))
+        {
+            holidayRenderCache[date] = new List<HolidayListModel>(); // Temporary placeholder
+            var holidays = await GetHolidaysByDateAsync(date);
+            holidayRenderCache[date] = holidays;
+
+            // Request UI update only once the data is loaded
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task<List<HolidayListModel>> GetHolidaysByDateAsync(DateTime date)
+    {
+        return await holidayService.GetAllHolidaysByYearMonthAsync(date);
+    }
+
+    // Cache dictionary to store fetched holiday data
+    private readonly Dictionary<DateTime, List<HolidayListModel>> holidayRenderCache = new();
+
+}
+
+<Style>
+    .events {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+        .events .ant-badge-status {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+            text-overflow: ellipsis;
+            font-size: 12px;
+        }
+
+    .notes-month {
+        text-align: center;
+        font-size: 28px;
+    }
+
+        .notes-month section {
+            font-size: 28px;
+        }
+</Style>

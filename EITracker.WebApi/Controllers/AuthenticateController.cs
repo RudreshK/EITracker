@@ -33,31 +33,31 @@ namespace ODataDemo.Controllers
         public async Task<IActionResult> GetToken([FromBody] LoginViewModel model)
         {
             var result = new ResultViewModel();
-
             var signInResult = await _userManager.FindByEmailAsync(model.UserName);
-
-            result.Status = signInResult != null ? Status.Success : Status.Error;
-            result.Message = signInResult != null
-                ? $"Welcome {model.UserName}"
-                : "Invalid login";
-            result.Data = signInResult != null
-                ? $"Success"
-            : $"<li>Invalid login attempt - {signInResult}</li>";
 
             if (signInResult != null && await _userManager.CheckPasswordAsync(signInResult, model.Password))
             {
-                var token = this._jwtService.GenerateToken(model.UserName);
+                result.Status = Status.Success;
+                result.Message = $"Welcome {model.UserName}";
+                result.Data = "Success";
+
+                var token = _jwtService.GenerateToken(model.UserName);
                 var refreshToken = string.Empty;
-                return this.Ok(new
+
+                return Ok(new
                 {
                     data = result,
                     token,
-                    refreshToken,
+                    refreshToken
                 });
             }
             else
             {
-                return this.Unauthorized(new { data = result });
+                result.Status = signInResult != null ? Status.Error : Status.Fail;
+                result.Message = signInResult != null ? "Invalid password" : "Invalid login";
+                result.Data = signInResult != null ? $"<li>Invalid password attempt - {model.UserName}</li>" : "";
+
+                return Unauthorized(new { data = result });
             }
         }
 

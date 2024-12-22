@@ -8,12 +8,12 @@ namespace EITracker.Models
 {
     /// <summary>Gets or sets.</summary>
     public class LoginViewModel
-    {
+    {       
         /// <summary>Gets or sets.</summary>
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
 
         /// <summary>Gets or sets.</summary>
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
     }
 }

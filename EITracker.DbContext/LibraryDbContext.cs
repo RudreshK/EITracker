@@ -15,6 +15,8 @@ namespace EITracker.DbContext
         public DbSet<BookAllotment> BookAllotments { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<HolidayList> HolidayLists { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -59,6 +61,15 @@ namespace EITracker.DbContext
                 chatMessage.HasKey(t => new { t.ChatId });
                 chatMessage.Property(t => t.ChatId).ValueGeneratedOnAdd().IsRequired();
                 chatMessage.Property(t => t.CreatedDate).ValueGeneratedOnAdd();              
+            });
+            modelBuilder.Entity<HolidayList>(holiday =>
+            {
+                holiday.ToTable("HolidayList", "dbo");
+                holiday.HasKey(t => new { t.HolidayId });
+                holiday.Property(t => t.HolidayId).ValueGeneratedOnAdd().IsRequired();
+                holiday.Property(t => t.CreatedTime).ValueGeneratedOnAdd();
+                holiday.Property(t => t.ModifiedTime).ValueGeneratedOnAdd();
+                holiday.Property(t => t.ConcurrencyStamp).IsRowVersion();
             });
         }
     }
