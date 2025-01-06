@@ -1,0 +1,290 @@
+﻿@page "/leave-request"
+@using System.ComponentModel.DataAnnotations;
+@using System.Globalization
+@using EITracker.Models;
+@using System.Text.Json;
+@using EITracker.UI.Services;
+@inject IUserService userService;
+
+
+<div class="page-header-rect">
+    <h3 class="header-text">Leave Request</h3>
+</div>
+<div class="inbound-container"><div class="add__btn receive-shipment-btn" @onclick="@(()=>{ _visible = true; })">Apply Leave</div></div>
+@{
+    RenderFragment footer = @<Template>
+        <Button Style="background-color:#009cff; color:aliceblue" OnClick="@HandleOk" @key="@( "submit" )"
+                Type="ButtonType.Primary">
+
+            Apply Leave
+        </Button>
+
+        <Button Style="background-color:#fd7e14; color:aliceblue" OnClick="@HandleCancel" @key="@( "back" )">Clear</Button>
+    </Template>;
+}
+<Modal Width="1000" Title="Leave Request Details" @bind-Visible="@_visible"
+       OnOk="@HandleOk"
+       OnCancel="@HandleCancel"
+       Footer="@footer">
+
+    <Form @ref="formRef"
+          Model="@model"
+          OnFinish="@OnFinish"
+          OnFinishFailed="@OnFinishFailed"
+          LabelColSpan="6"
+          WrapperColSpan="12">
+        <!-- Row for User Name and Password fields -->
+
+        <div class="ant-row">
+            <div class="ant-col ant-col-12">
+                <FormItem Label="TO" LabelColSpan="6" WrapperColSpan="16">
+                    <Select TItem="Person"
+                            TItemValue="string"
+                            DataSource="@_persons"
+                            @bind-Value="@context.selectedUser"
+                            LabelName="@nameof(Person.Name)"
+                            ValueName="@nameof(Person.Value)"
+                            Placeholder="Select a person"
+                            DefaultActiveFirstOption="false"
+                            EnableSearch
+                            OnBlur="OnBlur"
+                            OnFocus="OnFocus"
+                            OnSelectedItemChanged="OnSelectedItemChangedHandler"
+                            OnSearch="OnSearch"
+                            FilterExpression="(item, searchValue) => CultureInfo.CurrentCulture.CompareInfo.IndexOf(item.Label, searchValue, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) >= 0">
+                    </Select>
+                </FormItem>
+            </div>
+            <div class="ant-col ant-col-12">
+                <FormItem Label="Leave Date" LabelColSpan="6" WrapperColSpan="16">
+                    <RangePicker TValue="DateTime?[]" ShowTime="@true" />
+                </FormItem>
+            </div>
+        </div>
+        <div class="ant-row">
+            <div class="ant-col ant-col-12">
+                <FormItem Label="CC" LabelColSpan="6" WrapperColSpan="16">
+                    <Select Mode="tags"
+                            @bind-Values="@_selectedValues2"
+                            Placeholder="Please select CC"
+                            TItemValue="string"
+                            TItem="string"
+                            Size="large"
+                            OnSelectedItemsChanged="OnSelectedItemsChangedHandler">
+                        <SelectOptions>
+                            @foreach (var item in _persons)
+                            {
+                                <SelectOption TItemValue="string" TItem="string" Value=@item.Value Label=@item.Name />
+                            }
+                        </SelectOptions>
+                    </Select>
+                </FormItem>
+            </div>
+            <div class="ant-col ant-col-12">
+                <FormItem Label="Leave Type" LabelColSpan="6" WrapperColSpan="16">
+                    <Select TItem="SelectItem<Enums.LeaveType>"
+                            TItemValue="string"
+                            DataSource="@_leaveTypes"
+                            @bind-Value="@context.selectedLeavetype"
+                            LabelName="Label"
+                            ValueName="Value"
+                            Placeholder="Select a Leave Type"
+                            DefaultActiveFirstOption="false"
+                            EnableSearch
+                            OnSelectedItemChanged="OnSelectedItemChangedLeaveType"
+                            OnSearch="OnSearch"
+                            FilterExpression="(item, searchValue) => CultureInfo.CurrentCulture.CompareInfo.IndexOf(item.Label, searchValue, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) >= 0">
+                    </Select>
+                </FormItem>
+            </div>
+           
+        </div>
+        <div class="ant-row">
+            <div class="ant-col ant-col-12">
+                <FormItem Label="Subject" LabelColSpan="6" WrapperColSpan="16">
+                    <Input @bind-Value="@context.Subject" />
+                </FormItem>
+            </div>
+            <div class="ant-col ant-col-12">
+                <FormItem Label="No Of Days" LabelColSpan="6" WrapperColSpan="16">
+                    <Input @bind-Value="@context.NoOfDays" />
+                </FormItem>
+            </div>
+        </div>
+        <div class="ant-row">
+            <div class="ant-col ant-col-24">
+                <FormItem Label="Message" LabelColSpan="3" WrapperColSpan="20">
+                    <TextArea @bind-Value="@context.Message" />
+                </FormItem>
+            </div>
+        </div>
+        <div class="ant-row">
+            <div class="ant-col ant-col-24">
+                <InputFile id="fileInput" OnChange="UploadFiles" hidden multiple />
+
+                <Upload  Name="files" FileList="fileList">
+                    <label class="ant-btn" for="fileInput">
+                        <Icon Type="@IconType.Outline.Upload" />
+                        Click to Upload Documents
+                    </label>
+                </Upload>
+            </div>
+        </div>
+
+    </Form>
+
+</Modal>
+
+
+@code {
+
+    bool _visible = false;
+    bool _loading = false;
+    private UserModel user;
+    public LeaveRequestModel leaveRequestModel;
+    private IForm formRef;
+    List<UploadFileItem> fileList = new List<UploadFileItem>();
+
+    IEnumerable<string> _selectedValues2;
+
+    class Person
+    {
+        public string Value { get; set; }
+        public string Name { get; set; }
+    }
+
+    List<Person> _persons;
+    private List<SelectItem<Enums.LeaveType>> _leaveTypes;
+
+
+    public class SelectItem<T>
+    {
+        public string Label { get; set; }
+        public string Value { get; set; }
+    }
+    private List<UserModel>? userModels;
+
+    protected override void OnInitialized()
+    {
+        // Initialize the leave types from the enum
+        _leaveTypes = Enum.GetValues(typeof(Enums.LeaveType))
+                                .Cast<Enums.LeaveType>()
+                                .Select(leaveType => new SelectItem<Enums.LeaveType>
+                                    {
+                                        Label = CommonMethods.GetDisplayName(leaveType), // Enum name as display label
+                                        Value = leaveType.ToString()           // Enum value
+                                    })
+                                .ToList();
+        GetAllUsers();
+    }
+
+    private async Task GetAllUsers()
+    {
+        userModels = await userService.GetAllUsersAsync();
+        _persons = userModels.Select(user => new Person
+            {
+                Value = user.Id.ToString(),
+                Name = user.Email,
+            }).ToList();
+    }
+    private void OnTimeRangeChange(DateRangeChangedEventArgs<DateTime?[]> args)
+    {
+        Console.WriteLine($"Selected Time: {JsonSerializer.Serialize(args.Dates)}");
+        Console.WriteLine($"Formatted Selected Time: {JsonSerializer.Serialize(args.DateStrings)}");
+    }
+    private void OnSelectedItemChangedHandler(Person value)
+    {
+        Console.WriteLine($"selected: ${value?.Name}");
+    }
+    private void OnSelectedItemChangedLeaveType(SelectItem<Enums.LeaveType> value)
+    {
+        Console.WriteLine($"selected: ${value}");
+    }
+    private void OnBlur()
+    {
+        Console.WriteLine("blur");
+    }
+
+    private void OnFocus()
+    {
+        Console.WriteLine("focus");
+    }
+
+    private void OnSearch(string value)
+    {
+        Console.WriteLine($"search: {value}");
+    }
+    private void OnSelectedItemsChangedHandler(IEnumerable<string> values)
+    {
+        if (values != null)
+            Console.WriteLine($"selected: ${string.Join(",", values)}");
+    }
+
+    public class Model
+    {
+        [Required]
+        public string Username { get; set; }
+        [Required]
+        public string Password { get; set; }
+        [Required]
+        public string selectedUser;
+        [Required]
+        public string selectedLeavetype;
+        [Required]
+        public string Subject { get; set; }
+        [Required]
+        public string NoOfDays { get; set; }
+        [Required]
+        public string Message { get; set; }
+        [Required]
+        public string TO;
+        [Required]
+        public string CC;
+
+        public bool RememberMe { get; set; } = true;
+
+    }
+
+    private Model model = new Model();
+
+    private void OnFinish(EditContext editContext)
+    {
+        Console.WriteLine($"Success:{JsonSerializer.Serialize(model)}");
+    }
+
+    private void OnFinishFailed(EditContext editContext)
+    {
+        Console.WriteLine($"Failed:{JsonSerializer.Serialize(model)}");
+    }
+    private async Task HandleOk()
+    {
+        // Validate the form programmatically
+        if (formRef.Validate())
+        {
+
+            _visible = false;
+        }
+        else
+        {
+            Console.WriteLine("Form validation failed. Check the errors.");
+        }
+    }
+
+    private void HandleCancel()
+    {
+        formRef?.Reset();
+        _visible = false; // Close the modal on cancel
+    }
+    IList<IBrowserFile> files = new List<IBrowserFile>();
+    private void UploadFiles(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            files.Add(file);
+        }
+        //TODO upload the files to the server
+
+        fileList = files.Select(file => new UploadFileItem { FileName = file.Name, Size = file.Size }).ToList();
+    }
+
+}
